@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +43,12 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } while (result != null);
 
-                    Log.d("MainActivity", data.toString());
+                    JSONObject jsonObject = new JSONObject(data.toString());
+                    String message = jsonObject.getString("message");
+                    String status = jsonObject.getString("status");
+                    DogImg dogImg = new DogImg(message, status);
+
+                    Log.d("MainActivity", dogImg.toString());
                 } catch (Exception e) {
                     Log.d("MainActivity", e.toString());
                 }
