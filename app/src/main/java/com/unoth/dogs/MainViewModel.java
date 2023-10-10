@@ -10,6 +10,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.io.BufferedReader;
@@ -44,20 +45,29 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void loadDogImg() {
-        isLoading.setValue(true);
         Disposable disposable = loadDogImgRx()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Throwable {
+                        isLoading.setValue(true);
+                    }
+                })
+                .doAfterTerminate(new Action() {
+                    @Override
+                    public void run() throws Throwable {
+                        isLoading.setValue(false);
+                    }
+                })
                 .subscribe(new Consumer<DogImg>() {
                     @Override
                     public void accept(DogImg img) throws Throwable {
-                        isLoading.setValue(false);
                         dogImg.setValue(img);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Throwable {
-                        isLoading.setValue(false);
                         Log.d(TAG, "Error: " + throwable.getMessage());
                     }
                 });
