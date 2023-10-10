@@ -29,6 +29,7 @@ public class MainViewModel extends AndroidViewModel {
 
     private MutableLiveData<DogImg> dogImg = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isError = new MutableLiveData<>();
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
 
@@ -44,6 +45,10 @@ public class MainViewModel extends AndroidViewModel {
         return isLoading;
     }
 
+    public LiveData<Boolean> getIsError() {
+        return isError;
+    }
+
     public void loadDogImg() {
         Disposable disposable = loadDogImgRx()
                 .subscribeOn(Schedulers.io())
@@ -51,6 +56,7 @@ public class MainViewModel extends AndroidViewModel {
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(Disposable disposable) throws Throwable {
+                        isError.setValue(false);
                         isLoading.setValue(true);
                     }
                 })
@@ -58,6 +64,12 @@ public class MainViewModel extends AndroidViewModel {
                     @Override
                     public void run() throws Throwable {
                         isLoading.setValue(false);
+                    }
+                })
+                .doOnError(new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Throwable {
+                        isError.setValue(true);
                     }
                 })
                 .subscribe(new Consumer<DogImg>() {
