@@ -1,6 +1,7 @@
 package com.unoth.dogs;
 
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -25,12 +26,28 @@ public class MainActivity extends AppCompatActivity {
         initViews();
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         viewModel.loadDogImg();
+        viewModel.getIsLoading().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean loading) {
+                if (loading) {
+                    progressBar.setVisibility(View.VISIBLE);
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        });
         viewModel.getDogImg().observe(this, new Observer<DogImg>() {
             @Override
             public void onChanged(DogImg dogImg) {
                 Glide.with(MainActivity.this)
                         .load(dogImg.getMessage())
                         .into(imageViewDog);
+            }
+        });
+        buttonLoadImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewModel.loadDogImg();
             }
         });
     }
